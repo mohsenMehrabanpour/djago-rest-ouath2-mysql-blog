@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import local_config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-e#vl^c6z17a8*%)&up_&o9b0@8ndvw+zi=_$2qy4x!517u5cpl'
+SECRET_KEY = local_config.DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'author.apps.AuthorConfig',
+    'post.apps.PostConfig',
     'rest_framework'
 ]
 
@@ -76,8 +79,12 @@ WSGI_APPLICATION = 'blog_rest.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'blog',
+        'USER': local_config.MYSQL_USERNAME,
+        'PASSWORD': local_config.MYSQL_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 
