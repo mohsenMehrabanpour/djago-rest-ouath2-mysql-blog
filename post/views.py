@@ -15,14 +15,15 @@ class listPosts(APIView):
         page_obj = posts_paginator.get_page(page_number)
         posts = list(page_obj.object_list.values())
         pagination_details = {
-            'all_post_count': str(posts_paginator.count),
-            'page_count': str(posts_paginator.num_pages),
-            'this_page_number': str(page_obj.number),
+            'all_post_count': posts_paginator.count,
+            'page_count': posts_paginator.num_pages,
+            'this_page_number': page_obj.number,
             'has_next_page': page_obj.has_next(),
             'has_previous_page': page_obj.has_previous()
         }
         if pagination_details['has_next_page']:
-            pagination_details['next_page_number'] = page_obj.next_page_number()
+            pagination_details['next_page_number'] = page_obj.next_page_number(
+            )
         if pagination_details['has_previous_page']:
             pagination_details[
                 'previous_page_number'] = page_obj.previous_page_number()
