@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from author.models import Author
 from django.contrib.auth import get_user_model
-from rest_framework.parsers import JSONParser
+from rest_framework.parsers import JSONParser, MultiPartParser
 from post.models import Post
 from post.serializers import PostSerializer
 from rest_framework.pagination import PageNumberPagination
@@ -54,10 +54,41 @@ class profile(APIView):
 
 class AuthorPosts(APIView):
     permission_classes = (IsAuthenticated, )
+    parser_classes = (MultiPartParser, )
 
     def get(self, request):
-        posts = Post.objects.filter(author__user_id=request.user.id).order_by('id')
+        posts = Post.objects.filter(
+            author__user_id=request.user.id).order_by('id')
         paginator = PageNumberPagination()
-        result_page = paginator.paginate_queryset(posts,request)
-        ser = PostSerializer(result_page,many=True)
+        result_page = paginator.paginate_queryset(posts, request)
+        ser = PostSerializer(result_page, many=True)
         return Response(ser.data)
+
+    def post(self, request):
+        post_info = {
+            'image': request.FILES.get('image', None),
+            'title': request.POST.get('title', None),
+            'body': request.POST.get('body', None),
+            'author': Author.objects.get(user_id=request.user.id)
+        }
+        res = self.__save_post(post_info)
+        return res
+
+    def __save_post(self, post_info):
+        if post_info['title'] is None:
+            return Response(
+                {
+                    'message_type': 'error',
+                    'body': 'title can not be empty'
+                },
+                status=401)
+        if post_info['image'] is None:
+            post_info.pop('image')
+        post = Post(**post_info)
+        post.save()
+        return Response(
+            {
+                'message_type': 'success',
+                'body': 'post added successfully'
+            },
+            status=201)
